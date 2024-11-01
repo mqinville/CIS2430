@@ -64,10 +64,9 @@ public class Portfolio {
                     System.out.println("Error occurred witht invesment type");
                 break;
             }
-
         } else {
             if (foundInvestment instanceof Stock) { // If found investment is a stock update it variables
-                ((Stock)foundInvestment).buyMoreStocks(buyPrice, buyQuantity);
+                ((Stock)foundInvestment).buyMoreStocks(buyPrice, buyQuantity); 
             } else if (foundInvestment instanceof MutualFund) { // else updatevthe mututal fund variables
                 ((MutualFund)foundInvestment).buyMoreFunds(buyPrice, buyQuantity);
             }
@@ -87,57 +86,37 @@ public class Portfolio {
         Investment foundInvestment;
         int sellQuantity; // Integer array that will hold the positions of where our investment is located. First index == stock, second == mutfund
         double sellPrice; // Variables that hold the price invesment is sold at
-        String symbol, investmentType; // Strings to hold the symbol and the type of invesment were dealing with
+        String symbol; // Strings to hold the symbol and the type of invesment were dealing with
 
         symbol = fetchInvestmentSymbol(scanner); // Fetch user input for symbol
         foundInvestment = checkForSymbolInList(symbol);
 
-
-        if (foundInvestment != null) { // If an investment with given symbol exosts in portfolio
-            
+        if (foundInvestment != null) { // If an investment with given symbol exosts in portfolio            
             sellQuantity = fetchInvestmentQuantity(scanner); // Fetch the amount of shares/units being sold
             sellPrice = fetchInvestmentPrice(scanner); // Fetch the price of the shares/units being sold
 
             // If an invalid sell quantity is given return from the function
             if (sellQuantity > foundInvestment.getQuantity()) {
-                return;
-            }
-            if (foundInvestment instanceof Stock) {
-                if (found)
+                System.out.println("Error selling investment. Only " + foundInvestment.getQuantity() + "shares, cannot sell" + sellQuantity + "\n"); // Print error message 
+                return; // return if sell quantity is greater than currently owned quantity
 
-            } else if (foundInvestment instanceof MutualFund) {
-
-            }
-
-            // Decide which stock we are selling
-            switch(investmentType) {
-                case "stock":
-                    Stock sellStock = stocksPortfolio.get(investmentPosition); // Fetch the stock at invesment positon
-
-                    if (sellStock.getQuantity() == sellQuantity) { // If quantity being sold is the same as current stock quantity remove it from the list
-                        printCompleteSaleInfo(sellPrice, sellStock.getSalePayment(), sellStock.getGain(), symbol, investmentType); // Print the sale info
-                        stocksPortfolio.remove(investmentPosition); // Remove the stock from the list if sold completely
-                    } else if (sellQuantity < sellStock.getQuantity()) { // If the sell quantity is less then the current quantity update the investment
-                        sellStock.sellSomeStocks(sellPrice, sellQuantity); // Update investment
-                    } else {    // If the quantity is greater than the amount of shares the invesment has print error message
-                        System.out.println("Only " + sellStock.getQuantity() + " shares of "+ symbol + ". Cannot sell " + sellQuantity +".");
-                    }
-                break;
-                    case "mutualfund":
-                    MutualFund sellMutFund= mutualFundsPortfolio.get(investmentPosition); // Fetch the stock at invesment positon
-                    
-                    if (sellMutFund.getQuantity() == sellQuantity) { // If quantity being sold is the same as current mutualfund quantity remove it from the list
-                        printCompleteSaleInfo(sellPrice, sellMutFund.getSalePayment(), sellMutFund.getGain(), symbol, investmentType);
-                        mutualFundsPortfolio.remove(investmentPosition); // Remove the mutual fund from the list
-                    } else if (sellQuantity < sellMutFund.getQuantity()) {
-                        sellMutFund.sellSomeMutualFunds(sellPrice, sellQuantity);
-                    } else {
-                        System.out.println("Only " + sellMutFund.getQuantity() + " units of "+ symbol + ". Cannot sell " + sellQuantity +".");
-                    }
-                break;
+            } else if (sellQuantity == foundInvestment.getQuantity()) {
+                if (foundInvestment instanceof Stock) {
+                    printCompleteSaleInfo(sellPrice, ((Stock)foundInvestment).getSalePayment(), ((Stock)foundInvestment).getGain(), symbol, "stock"); // Print the sale info
+                    investmentPortfolio.remove(foundInvestment); // remove the invesment from the lksit if we sell all currently owned shares
+                } else if (foundInvestment instanceof MutualFund) {
+                    printCompleteSaleInfo(sellPrice, ((MutualFund)foundInvestment).getSalePayment(), ((MutualFund)foundInvestment).getGain(), symbol, "mutualfund"); // Print the sale info
+                    investmentPortfolio.remove(foundInvestment); // remove the invesment from the lksit if we sell all currently owned shares
+                }
+            } else if (sellQuantity < foundInvestment.getQuantity()) {
+                if (foundInvestment instanceof Stock) { 
+                    ((Stock)foundInvestment).sellSomeStocks(sellPrice, sellQuantity);
+                } else if (foundInvestment instanceof MutualFund) {
+                    ((MutualFund)foundInvestment).sellSomeMutualFunds(sellPrice, sellQuantity);
+                }
             }
         } else {
-            // Print that stock was not found if co
+            // Print that stock was not found in list if ivnalid symbol was given
             System.out.println("Error selling investment. " + symbol + " is not in the investment portfolio.\n");
         }
         return;
