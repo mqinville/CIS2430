@@ -1,8 +1,10 @@
 package ePortfolio;
 
 import java.util.ArrayList; // Import arraylist functionality
+import java.util.HashMap; // Import hashmao functionality 
 import java.util.Scanner; // Import scanning functionality
-import java.util.InputMismatchException;
+
+import java.util.InputMismatchException; // Input exception object to handle input mismatches
 
 /**
 * The Portfolio class represents a user's investment portfolio.
@@ -10,8 +12,8 @@ import java.util.InputMismatchException;
 */
 public class Portfolio {
     // Private instance variables for our investinment portfolio
-    private ArrayList<Stock> stocksPortfolio = new ArrayList<Stock>();   // Array list for stock investments
-    private ArrayList<MutualFund> mutualFundsPortfolio = new ArrayList<MutualFund>(); // Array list for mutual fund investments
+    private ArrayList<Investment> investmentPortfolio = new ArrayList<Investment>();   // Array list for stock investments
+    private HashMap<String, ArrayList<Integer>> keywordSearchIndex; // Create hashmap to hold indices of name keywords from investment
 
     /**
      * Prompts the user to buy an investment (either stock or mutual fund).
@@ -22,9 +24,9 @@ public class Portfolio {
      * @param scanner the Scanner object to read user input for investment information
      */
     public void buyInvestment(Scanner scanner) {
-
-        int buyQuantity = 0, investmentPoition; // Integer variables to store the quantity being bought and the position of an existing invesment in a stock
-        double buyPrice = -0.01; 
+        Investment foundInvestment; // Investment object to hold the investent if it is already in list
+        int buyQuantity; // Integer variables to store the quantity being bought and the position of an existing invesment in a stock
+        double buyPrice; 
         String symbol, name, buyOption;
 
         System.out.print("\nWhat type of investment do you want to buy (stock/mutualfund): ");
@@ -37,49 +39,40 @@ public class Portfolio {
         }
 
         symbol = fetchInvestmentSymbol(scanner); // Fetch user input for symbol
-        buyQuantity = fetchInvestmentQuantity(scanner); // Fetch user input for quantity
+        buyQuantity = fetchInvestmentQuantity(scanner); // Fetch user input for quantitys
         buyPrice = fetchInvestmentPrice(scanner); // Fetch user input for the price
 
-        switch (buyOption) {
-            case "stock":
-                investmentPoition = checkForSymbolInList(symbol, "stock");
+        foundInvestment = checkForSymbolInList(symbol); // Check if invesmtnent already exists, if it does store it in variable
 
-                if (investmentPoition == -1) { // If the stsock doesnt already exist, create new object
-                    if (checkForSymbolInList(symbol, "mutualfund") == -1) { // if the symbol is not in the mutual funds list proceed with new purchase
-                    
-                        name = fetchInvestmentName(scanner);
-                        
-                        Stock newStock = new Stock(symbol, name, buyQuantity, buyPrice);
-                        stocksPortfolio.add(newStock);
-                        System.out.println("New purchase! " + buyQuantity + " shares of " + symbol +" @"+ buyPrice + "$ successfully purchased!");
-                        return;
-                    } else {
-                        System.out.println(symbol + " is already a mutual fund. Symbols must be unique.");
-                        return;
-                    }
-                }
-                stocksPortfolio.get(investmentPoition).buyMoreStocks(buyPrice, buyQuantity); // Buy additional stocks
-            break;
-            case "mutualfund":
-                investmentPoition = checkForSymbolInList(symbol, "mutualfund");
-                if (investmentPoition == -1) { // If the stsock doesnt already exist, create new object
-                    if (checkForSymbolInList(symbol, "stock") == -1) { // If the symbol is not in the stock list proceed with new purchase
-                        
-                        name = fetchInvestmentName(scanner);
+        if (foundInvestment == null) {  // If the invesment doesnt exist in the portfolio then create new investment and add it to list
+            name = fetchInvestmentName(scanner); // Fetch the name for the new invesment if not present in list
+            
+            switch(buyOption.toLowerCase()) {
+                case "stock":
+                    Stock newStock = new Stock(symbol, name, buyQuantity, buyPrice);
+                    investmentPortfolio.add(newStock); // Add the new stock to the list
+                    System.out.println("New purchase! " + buyQuantity + " shares of " + symbol +" @"+ buyPrice + "$ successfully purchased!");                
+                break;
 
-                        MutualFund newMutFund = new MutualFund(symbol, name, buyQuantity, buyPrice); // Instantiate the new mutualfund object
-                        mutualFundsPortfolio.add(newMutFund); // Add new mutual fund to the list
-                        System.out.println("New purchase! " + buyQuantity + " units of " + symbol +" @"+ buyPrice + "$ successfully purchased!");
-                        return;
-                    } else {
-                        System.out.println(symbol + " is already a stock. Symbols must be unique.");
-                        return;
-                    }
-                }
-                mutualFundsPortfolio.get(investmentPoition).buyMoreFunds(buyPrice, buyQuantity); // Buy additional mutualfunds
-            break;
-        }    
-    }
+                case "mutualfund":
+                    MutualFund newMutFund = new MutualFund(symbol, name, buyQuantity, buyPrice); // Create new mutual fund object
+                    investmentPortfolio.add(newMutFund); // Add the newly created mutfund to the list
+                    System.out.println(symbol + " is already a mutual fund. Symbols must be unique.");
+                break;
+
+                default: 
+                    System.out.println("Error occurred witht invesment type");
+                break;
+            }
+
+        } else {
+            if (foundInvestment instanceof Stock) { // If found investment is a stock update it variables
+                ((Stock)foundInvestment).buyMoreStocks(buyPrice, buyQuantity);
+            } else if (foundInvestment instanceof MutualFund) { // else updatevthe mututal fund variables
+                ((MutualFund)foundInvestment).buyMoreFunds(buyPrice, buyQuantity);
+            }
+        }
+    }    
 
     /**
      * Prompts the user to sell an investment given an investment symbol.
@@ -91,19 +84,30 @@ public class Portfolio {
      * @param scanner the Scanner object to read user input for sale information
      */
     public void sellInvestment(Scanner scanner) {
-        int sellQuantity, investmentPosition; // Integer array that will hold the positions of where our investment is located. First index == stock, second == mutfund
+        Investment foundInvestment;
+        int sellQuantity; // Integer array that will hold the positions of where our investment is located. First index == stock, second == mutfund
         double sellPrice; // Variables that hold the price invesment is sold at
         String symbol, investmentType; // Strings to hold the symbol and the type of invesment were dealing with
 
         symbol = fetchInvestmentSymbol(scanner); // Fetch user input for symbol
+        foundInvestment = checkForSymbolInList(symbol);
 
-        investmentType = checkForSymbolInBothList(symbol); //  Check 
 
-        if (!investmentType.equalsIgnoreCase("none")) { // If the symbol is in portfolio proceed with sale
-            investmentPosition = checkForSymbolInList(symbol, investmentType); // Store the position of the investment
+        if (foundInvestment != null) { // If an investment with given symbol exosts in portfolio
             
             sellQuantity = fetchInvestmentQuantity(scanner); // Fetch the amount of shares/units being sold
             sellPrice = fetchInvestmentPrice(scanner); // Fetch the price of the shares/units being sold
+
+            // If an invalid sell quantity is given return from the function
+            if (sellQuantity > foundInvestment.getQuantity()) {
+                return;
+            }
+            if (foundInvestment instanceof Stock) {
+                if (found)
+
+            } else if (foundInvestment instanceof MutualFund) {
+
+            }
 
             // Decide which stock we are selling
             switch(investmentType) {
@@ -134,7 +138,7 @@ public class Portfolio {
             }
         } else {
             // Print that stock was not found if co
-            System.out.println("Error selling investment. " + symbol + " is not in the portfolio. ");
+            System.out.println("Error selling investment. " + symbol + " is not in the investment portfolio.\n");
         }
         return;
     }
@@ -243,37 +247,18 @@ public class Portfolio {
     }
 
     /**
-     * Checks if a symbol is present in either the stock or mutual fund list, based on the specified type.
-     * If the symbol is found in the appropriate list, its position (index) in that list is returned.
-     * If the symbol is not found, the method returns -1.
-     *
+     * Checks if an investment is present in the investment portfolio
+     * If the investment is found in the investment portfolio then return said investment list
      * @param symbol the symbol to search for in the portfolio
-     * @param type the type of investment ("stock" or "mutualfund") to determine which list to search
-     * @return the index position of the symbol in the specified list, or -1 if the symbol is not found
+     * @return the investment if found, else return null
      */
-    private int checkForSymbolInList(String symbol, String type) {
-
-        int position; // Will store the index of the invesment within its own list
-
-        // If boolean variable is true, we check for the symbol being in the stock list;
-        if (type.equalsIgnoreCase("stock")) { // stock list
-            for (int i = 0; i < stocksPortfolio.size(); i++) {
-                Stock curStock = stocksPortfolio.get(i);
-                if(curStock.getSymbol().equalsIgnoreCase(symbol)) {
-                    position = i;
-                    return position; // Return true if the symbol is present in the stock list
-                }
-            }
-        } else if (type.equalsIgnoreCase("mutualfund")) { // If false, chexk to see if symbol is in mutualfunds list
-            for (int i = 0; i < mutualFundsPortfolio.size(); i++) {
-                MutualFund curMutFund = mutualFundsPortfolio.get(i);
-                if (curMutFund.getSymbol().equalsIgnoreCase(symbol)) {
-                    position = i;
-                    return position; // Return true if the mutual fund is in the mutual funds list
-                }
+    private Investment checkForSymbolInList(String symbol) {
+        for (Investment curInvestment : investmentPortfolio) {
+            if (curInvestment.getSymbol().equalsIgnoreCase(symbol)) {
+                return curInvestment; // Return the invesment if it is present in the list
             }
         }
-        return -1; // return -1 indicating invesment is not in a list
+        return null; // Return null indicating that the investment is not in the portfolio
     }
 
     /**

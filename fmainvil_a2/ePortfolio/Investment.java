@@ -100,7 +100,7 @@ public abstract class Investment {
     public boolean priceMatch(String priceRange) {
         String[] partitionedPriceRange = new String[2]; // Create array of two string that will hole split od price range string, will determine the bound of the price match
         Double lowerBound = Double.NEGATIVE_INFINITY, upperBound=Double.POSITIVE_INFINITY; // Wrapper class doubles that will hold the nounds we are comparing
-
+        
         if (priceRange == null || priceRange.isBlank()) {
             return true; // If passed string is emepty simply return true
         }
