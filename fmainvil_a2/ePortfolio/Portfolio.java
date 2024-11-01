@@ -156,21 +156,19 @@ public class Portfolio {
      * as well as the combined total gain for the entire investment portfolio.
      */
     public void getGainPortfolio() {
-
         double[] gains = {0.00,0.00}; // Create integer array, index one holds sum of gains for stocks, index 2 for mutualfunds
 
         System.out.println("\n");
 
-        for (int i = 0; i < stocksPortfolio.size(); i++) {
-            Stock curStock = stocksPortfolio.get(i);
-            System.out.println("Gain for " + curStock.getSymbol() + ": " + String.format("%.2f", curStock.getGain()));
-            gains[0] += curStock.getGain(); // Sum the gain for each stock
-        }
-
-        for (int i = 0; i < mutualFundsPortfolio.size(); i++) {
-            MutualFund curMutFund = mutualFundsPortfolio.get(i);
-            System.out.println("Gain for " + curMutFund.getSymbol() + ": " + String.format("%.2f", curMutFund.getGain()));
-            gains[1] += curMutFund.getGain(); // Sum the gain for each stock
+        // Calculate gain for stocks and investments
+        for (Investment curInvestment : investmentPortfolio) {
+            if (curInvestment instanceof Stock) {
+                System.out.println("Gain for " + ((Stock)curInvestment).getSymbol() + ": " + String.format("%.2f", ((Stock)curInvestment).getGain()));
+                gains[0] += ((Stock)curInvestment).getGain();
+            } else if (curInvestment instanceof MutualFund) {   
+                System.out.println("Gain for " + ((MutualFund)curInvestment).getSymbol() + ": " + String.format("%.2f", ((MutualFund)curInvestment).getGain()));
+                gains[1] += ((MutualFund)curInvestment).getGain();
+            }
         }
         
         System.out.println("\n------------ PORTFOLIO GAINS ------------");
