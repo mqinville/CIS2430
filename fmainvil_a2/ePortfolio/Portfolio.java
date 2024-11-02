@@ -51,12 +51,14 @@ public class Portfolio {
                 case "stock":
                     Stock newStock = new Stock(symbol, name, buyQuantity, buyPrice);
                     investmentPortfolio.add(newStock); // Add the new stock to the list
+                    addKeywordIndex(newStock);
                     System.out.println("New purchase! " + buyQuantity + " shares of " + symbol +" @"+ buyPrice + "$ successfully purchased!");                
                 break;
 
                 case "mutualfund":
                     MutualFund newMutFund = new MutualFund(symbol, name, buyQuantity, buyPrice); // Create new mutual fund object
                     investmentPortfolio.add(newMutFund); // Add the newly created mutfund to the list
+                    addKeywordIndex(newMutFund);
                     System.out.println(symbol + " is already a mutual fund. Symbols must be unique.");
                 break;
 
@@ -102,12 +104,12 @@ public class Portfolio {
 
             } else if (sellQuantity == foundInvestment.getQuantity()) {
                 if (foundInvestment instanceof Stock) {
-                    printCompleteSaleInfo(sellPrice, ((Stock)foundInvestment).getSalePayment(), ((Stock)foundInvestment).getGain(), symbol, "stock"); // Print the sale info
-                    investmentPortfolio.remove(foundInvestment); // remove the invesment from the lksit if we sell all currently owned shares
+                    printCompleteSaleInfo(sellPrice, ((Stock)foundInvestment).getSalePayment(), ((Stock)foundInvestment).getGain(), symbol, "stock"); // Print the sale info                    
                 } else if (foundInvestment instanceof MutualFund) {
                     printCompleteSaleInfo(sellPrice, ((MutualFund)foundInvestment).getSalePayment(), ((MutualFund)foundInvestment).getGain(), symbol, "mutualfund"); // Print the sale info
-                    investmentPortfolio.remove(foundInvestment); // remove the invesment from the lksit if we sell all currently owned shares
                 }
+                removeKeywordIndex(foundInvestment); // Update the keyword search index after completely selling an investment
+                investmentPortfolio.remove(foundInvestment); // Remove the investment from the list if we sell it completely
             } else if (sellQuantity < foundInvestment.getQuantity()) {
                 if (foundInvestment instanceof Stock) { 
                     ((Stock)foundInvestment).sellSomeStocks(sellPrice, sellQuantity);
@@ -131,20 +133,11 @@ public class Portfolio {
     public void updateInvestmentPrices (Scanner scanner) {
         double newPrice; // Variavle that will hold the the price of the new investments
 
-        System.out.println("--- Updating stock prices ---\n");
-
-        for (int i = 0; i < stocksPortfolio.size(); i++) {
-            System.out.println("Updating the price for: " + stocksPortfolio.get(i).getSymbol());
+        System.out.println("--- Updating Investment prices ---\n");
+        for (Investment curInvestment : investmentPortfolio) {
+            System.out.print("Updating the price for: " + curInvestment.getSymbol() + ". Enter the new price: ");
             newPrice = fetchInvestmentPrice(scanner);
-            stocksPortfolio.get(i).setPrice(newPrice); // Update the price
-        }
-
-        System.out.println("--- Updating mutual fund prices ---\n");
-
-        for (int i = 0; i < mutualFundsPortfolio.size(); i++) {
-            System.out.println("Updating the price for: " + mutualFundsPortfolio.get(i).getSymbol());
-            newPrice = fetchInvestmentPrice(scanner);
-            mutualFundsPortfolio.get(i).setPrice(newPrice); // Update the price
+            curInvestment.setPrice(newPrice);
         }
     }
 
@@ -239,26 +232,6 @@ public class Portfolio {
     }
 
     /**
-     * Checks if a symbol is present in either the stock or mutual fund list.
-     * If the symbol is found in the stock list, the method returns "stock".
-     * If the symbol is found in the mutual fund list, the method returns "mutualfund".
-     * If the symbol is not found in either list, the method returns "none".
-     *
-     * @param symbol the symbol to search for in both the stock and mutual fund lists
-     * @return "stock" if the symbol is found in the stock list, "mutualfund" if found in the mutual fund list, 
-     *         or "none" if the symbol is not found in either list
-     */
-    private String checkForSymbolInBothList(String symbol) {
-        if (checkForSymbolInList(symbol, "stock") != -1) {
-            return "stock";
-        }  else if (checkForSymbolInList(symbol, "mutualfund") != -1) {
-            return "mutualfund"; 
-        } else {
-            return "none";
-        }
-    }
-
-    /**
      * Fetches user input for an investment symbol. Traps invalid inputs for symbol.
      * @param scanner the scanner used to get the input
      * @return the inputted label for the investment
@@ -341,6 +314,33 @@ public class Portfolio {
 
         return investmentPrice;
     }
+
+    private void addKeywordIndex(Investment investment) {
+            
+        String[] namePartition = investment.getName().trim().split(" ").;
+        int invesmentIndex = investmentPortfolio.indexOf(investment); // Integer variable that will hold the position of the invesment in the list
+
+        for (String keyword : namePartition) {
+            keywordSearchIndex.putIfAbsent(keyword, new ArrayList<Integer>()); // Create a new entry in the keywordSearchIndex if there is no entry with this key yet
+            if (!keywordSearchIndex.get(keyword).contains(invesmentIndex)) {
+                keywordSearchIndex.get(keyword).add(invesmentIndex);
+            }
+        }
+    }
+
+    private void removeKeywordIndex(Investment investment) { // Used when we sell an investment
+
+        String[] namePartition = investment.getName().trim().split(" ");
+        int invesmentIndex = investmentPortfolio.indexOf(investment); // Integer variable that will hold the position of the invesment in the list
+        
+        for (String keyword : namePartition) {
+            keywordSearchIndex.get(keyword).remove(invesmentIndex); // Get the array list for the specific keyworf and remove said investment index from the list
+            if (keywordSearchIndex.get(keyword).isEmpty()) {
+                keywordSearchIndex.remove(keyword); // If the array list for a particular keyword is empty then remove it from the keywordSearchIndex
+            }
+        }
+    }   
+
 
 
     /**
