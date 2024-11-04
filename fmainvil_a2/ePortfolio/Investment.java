@@ -1,5 +1,6 @@
 package ePortfolio;
 
+import java.io.BufferedReader;
 
 /**
  * The abstracted Investment class represents the superclass for all investments.
@@ -56,8 +57,21 @@ public abstract class Investment {
              "\nPrice: " + String.format("%.2f", this.price) + "$" +
              "\nbookValue: " + String.format("%.2f", this.bookValue) + "$\n";
     }
-      
 
+    /**
+     * Returns a string representation of the investment to write to file, including the symbol, name, quantity, price, and book value.
+     * This method provides a detailed description of the investment object, formatted to be written to a file.
+     *
+     * @return a string representing the investment's details to be written to a file
+     */
+    public String fileToString() {
+        return "symbol = " + this.symbol +
+             "\nname = " + this.name + 
+             "\nquantity = " + this.quantity + 
+             "\nprice = " + String.format("%.2f", this.price) +
+             "\nbookValue = " + String.format("%.2f", this.bookValue) + "\n";
+    }
+    
     /**
      * Calculates and returns the total gain from the investment.
      * The gain is calculated as (quantity * current price - commission) - book value.

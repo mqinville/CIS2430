@@ -1,5 +1,10 @@
 package ePortfolio;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList; // Import arraylist functionality
 import java.util.HashMap; // Import hashmao functionality 
 import java.util.Scanner; // Import scanning functionality
@@ -373,7 +378,85 @@ public class Portfolio {
                 keywordSearchIndex.remove(keyword); // If the array list for a particular keyword is empty then remove it from the keywordSearchIndex
             }
         }
-    }   
+    }
+    
+    public void saveInvestmentsToFIle(String fileName) {
+        try (PrintWriter fileWriter = new PrintWriter(new FileWriter(fileName))) {
+            for (Investment curInvestment : investmentPortfolio){
+                // Write the type of investment before info
+                if (curInvestment instanceof Stock) {
+                    fileWriter.println("type = stock\n");
+                } else if (curInvestment instanceof MutualFund) {
+                    fileWriter.println("type = mutualfund\n");
+                }
+                fileWriter.println(curInvestment.fileToString()); // Print the investment info to the file
+            }
+        } catch (IOException e) {
+            System.out.println("Error saving to file.");
+        }
+    }
+
+    public void readInvestmentsFromFile(String fileName) {
+        Investment curInvestment; // Investmebt variable that will hold the latest nvestment read from file
+
+        try (BufferedReader fileReader = new BufferedReader(new FileReader(fileName))){
+
+            do {
+                curInvestment = readInvestmentFromFile(fileReader); // Read the 
+                if (curInvestment != null) {
+                    investmentPortfolio.add(curInvestment); // Add the current investment to the list if it is valid
+                } else {
+                    return; // If it is null then return from the function
+                }
+            } while (curInvestment != null);
+        } catch (IOException e) {
+            System.out.println("Error loading from file.");
+        }
+
+
+        return; // Fale returns  will change later
+    }
+
+    public Investment readInvestmentFromFile(BufferedReader fileReader) throws IOException {
+        String lineBeingRead[];
+        String type, symbol, name;
+        int quantity;
+        double price, bookeValue;  
+
+        // Read the type of investment written to the file
+        lineBeingRead = fileReader.readLine().split(" = "); // Read the line and split it at the equals symbol
+        type = lineBeingRead[1].trim();
+
+        // Read symbol
+        lineBeingRead = fileReader.readLine().split(" = "); // Read the line and split it at the equals symbol
+        symbol = lineBeingRead[1];
+        
+        // Read name
+        lineBeingRead = fileReader.readLine().split(" = "); // Read the line and split it at the equals symbol
+        name  = lineBeingRead[1];
+        // Read quantity
+        lineBeingRead = fileReader.readLine().split(" = "); // Read the line and split it at the equals symbol
+        quantity = Integer.parseInt(lineBeingRead[1]);
+
+        // Read price
+        lineBeingRead = fileReader.readLine().split(" = "); // Read the line and split it at the equals symbol
+        price = Double.parseDouble(lineBeingRead[1]);
+
+        // Read bookValue
+        lineBeingRead = fileReader.readLine().split(" = "); // Read the line and split it at the equals symbol
+        bookeValue  = Double.parseDouble(lineBeingRead[1]);
+        fileReader.readLine(); // Read the new line charcter
+
+        if (type.equalsIgnoreCase("stock")) {
+            return new Stock(symbol, name, quantity, price);
+        } else if (type.equalsIgnoreCase("mutualfund")) {
+            return new MutualFund(symbol, name, quantity, price);
+        }
+
+        return null;
+
+    }
+
 
     /**
      * Prints the information for a completed sale, when an investment (either stock or mutual fund)
