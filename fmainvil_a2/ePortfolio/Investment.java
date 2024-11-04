@@ -54,7 +54,7 @@ public abstract class Investment {
              "\nInvesment name: " + this.name + 
              "\nQuantity: " + this.quantity + 
              "\nPrice: " + String.format("%.2f", this.price) + "$" +
-             "\nbookValue: " + String.format("%.2f", this.bookValue) + "$";
+             "\nbookValue: " + String.format("%.2f", this.bookValue) + "$\n";
     }
       
 

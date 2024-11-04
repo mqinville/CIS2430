@@ -7,6 +7,7 @@ import java.util.HashSet; // Import HashSets to take intersection of array list 
 import java.util.Set; // Import sets for array list intersections
 
 import java.util.InputMismatchException; // Input exception object to handle input mismatches
+import java.util.Map;
 
 /**
 * The Portfolio class represents a user's investment portfolio.
@@ -16,6 +17,11 @@ public class Portfolio {
     // Private instance variables for our investinment portfolio
     private ArrayList<Investment> investmentPortfolio = new ArrayList<Investment>();   // Array list for stock investments
     private HashMap<String, ArrayList<Integer>> keywordSearchIndex; // Create hashmap to hold indices of name keywords from investment
+
+    public Portfolio() {
+        this.investmentPortfolio = new ArrayList<Investment>();    
+        this.keywordSearchIndex = new HashMap<String, ArrayList<Integer>>();
+    }
 
     /**
      * Prompts the user to buy an investment (either stock or mutual fund).
@@ -54,6 +60,7 @@ public class Portfolio {
                     Stock newStock = new Stock(symbol, name, buyQuantity, buyPrice);
                     investmentPortfolio.add(newStock); // Add the new stock to the list
                     addKeywordIndex(newStock);
+                    printKeywordSearchIndex();
                     System.out.println("New purchase! " + buyQuantity + " shares of " + symbol +" @"+ buyPrice + "$ successfully purchased!");                
                 break;
 
@@ -61,7 +68,7 @@ public class Portfolio {
                     MutualFund newMutFund = new MutualFund(symbol, name, buyQuantity, buyPrice); // Create new mutual fund object
                     investmentPortfolio.add(newMutFund); // Add the newly created mutfund to the list
                     addKeywordIndex(newMutFund);
-                    System.out.println(symbol + " is already a mutual fund. Symbols must be unique.");
+                    System.out.println("New purchase! " + buyQuantity + " units of " + symbol +" @"+ buyPrice + "$ successfully purchased!");
                 break;
 
                 default: 
@@ -183,7 +190,6 @@ public class Portfolio {
      * @param scanner the Scanner object used to read user input for the search criteria
      */
     public void searchInvestmentPortfolio(Scanner scanner) {
-
         String symbol, priceRange, keyWordsString; // Strings that hold will hold info needed for invesment search
         boolean searchFound = false; // Boolean variable to see to denote if a search was found
         System.out.print("Enter a symbol for search: ");
@@ -196,26 +202,32 @@ public class Portfolio {
         keyWordsString = scanner.nextLine().toLowerCase();
         System.out.println("\n");
 
-        // Loop through stock investments
-        for (int i = 0; i < stocksPortfolio.size(); i ++) { // Loop through the stock array
-            if (stocksPortfolio.get(i).equals(symbol, priceRange, keyWordsString)) {
-                searchFound = true;
-                System.out.println(stocksPortfolio.get(i).toString() + "\n"); // If the the stock fits the given infromation, print the stock info
+        
+        if (keyWordsString == null || keyWordsString.isBlank()) { // If the keywordString is null then search list sequantially
+            // Loop through investments and print
+            for (Investment curInvestment : investmentPortfolio) {
+                if (curInvestment.equals(symbol,priceRange, keyWordsString)) {
+                    searchFound = true;
+                    System.out.println(curInvestment);
+                }
             }
-        }
+        } else {
+            ArrayList<Integer> searchIndex = getSearchIndex(keyWordsString); // Else if keywords string given get the improved serach index
 
-        // Loop through mutualfund investments
-        for (int i = 0; i < mutualFundsPortfolio.size(); i ++) { // Loop through the stock array
-            if (mutualFundsPortfolio.get(i).equals(symbol, priceRange, keyWordsString)) {
-                searchFound =  true;
-                System.out.println(mutualFundsPortfolio.get(i).toString() + "\n"); // If the the mtutualfund fits the given infromation, print the mutuualfund info
+            if (searchIndex != null) { // If the fetched serach index is not null proceed with search
+                for (int i : searchIndex) {
+                    Investment curInvestment = investmentPortfolio.get(i); // Get the investment in our improved array index
+                    if (curInvestment.equals(symbol, priceRange, "")) {
+                        searchFound = true;
+                        System.out.println(curInvestment); // Print the investment
+                    }
+    
+                }
             }
-        }
-
+        }   
         if (searchFound == false) {
             System.out.println("\nNo search results found."); // print that no search results were found if check is false
         }
-
     }
 
     /**
@@ -323,6 +335,7 @@ public class Portfolio {
         int invesmentIndex = investmentPortfolio.indexOf(investment); // Integer variable that will hold the position of the invesment in the list
 
         for (String keyword : namePartition) {
+            keyword = keyword.toLowerCase();
             keywordSearchIndex.putIfAbsent(keyword, new ArrayList<Integer>()); // Create a new entry in the keywordSearchIndex if there is no entry with this key yet
             if (!keywordSearchIndex.get(keyword).contains(invesmentIndex)) {
                 keywordSearchIndex.get(keyword).add(invesmentIndex);
@@ -330,18 +343,23 @@ public class Portfolio {
         }
     }
 
-    private ArrayList<Integer> searchKeywordIndex(String keywords) {    
+    private ArrayList<Integer> getSearchIndex(String keywords) {    
 
         String[] keywordPartition = keywords.trim().split(" "); // Split the given keyword string at every space
-        Set<Integer> searchIndex = new HashSet<>(keywordSearchIndex.get(keywordPartition[0])); // Set the search index to the array list of the first keyword search, take the set of this for intersections
-        Set<Integer> intersection;// Denote set that will hold the arraylist we want to intersection with our serach index
+        Set<Integer> searchIndex, intersection;// Sets that will hold arrayList indices for intersection
+
+        if (keywordSearchIndex.get(keywordPartition[0]) == null) {
+            return null; // Return null indicting no investment with keyword
+        }
+
+        searchIndex = new HashSet<>(keywordSearchIndex.get(keywordPartition[0]));
         
         for (String curWord : keywordPartition) { // Loop through all given keywords    
             intersection = new HashSet<>(keywordSearchIndex.get(curWord)); // get the array list of the current keywords index we want to intersect
             searchIndex.retainAll(intersection); // Take the intersection of both sets -- make our serahc index keep the elements it only has in common with the intersection set
         }
 
-        return new ArrayList<>(searchIndex); // Return the search index as an array
+        return new ArrayList<Integer>(searchIndex); // Return the search index as an array
     }
 
     private void removeKeywordIndex(Investment investment) { // Used when we sell an investment
@@ -382,5 +400,16 @@ public class Portfolio {
             System.out.println("Total gain from sale: " + String.format("%.2f",gain) + "$."); // Print total gain after sale
             System.out.println("No more shares left, removing " + symbol +" from list"); // Print removal message
         }
-    }  
+    }
+    
+    public void printKeywordSearchIndex() {
+    for (Map.Entry<String, ArrayList<Integer>> entry : keywordSearchIndex.entrySet()) {
+        String keyword = entry.getKey();
+        ArrayList<Integer> indices = entry.getValue();
+        
+        System.out.print("Keyword: " + keyword + " -> Indices: ");
+        System.out.println(indices);
+    }
+}
+
 }
