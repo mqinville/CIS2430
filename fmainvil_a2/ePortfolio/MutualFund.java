@@ -70,7 +70,7 @@ public class MutualFund extends Investment {
      */
     public void buyMoreFunds(double price, int quantity) {
         super.setPrice(price);
-        super.setQuantity(quantity);
+        super.setQuantity(super.getQuantity() + quantity); // Update the quantity
         super.setBookValue(super.getBookValue() + (price * quantity));
         System.out.println("Additional " + quantity + " units of " + super.getSymbol() +" @"+ price + "$ succesfully purchased!");
     }

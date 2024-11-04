@@ -7,6 +7,8 @@ public class Main {
         Scanner scanner = new Scanner(System.in); // Declare new scanner
         Portfolio investmentPortoflio = new Portfolio(); // Create a portfolio object 
 
+        investmentPortoflio.readInvestmentsFromFile(args[0]); // Read existing investments from the file
+
         do {
             printMenu(); //  Print the menu
             System.out.print("Select a menu option: ");
@@ -53,6 +55,7 @@ public class Main {
                 case "qu":
                 case "qui":
                 case "quit":
+                    investmentPortoflio.saveInvestmentsToFile(args[0]); // Save current investment information to a file
                     scanner.close();
                     System.exit(0);
                 break;

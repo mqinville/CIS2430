@@ -70,7 +70,7 @@ public class Stock extends Investment {
      */
     public void buyMoreStocks(double price, int quantity) {
         super.setPrice(price);
-        super.setQuantity(quantity);
+        super.setQuantity(super.getQuantity() + quantity);
         super.setBookValue(super.getBookValue() + ((price * quantity) + COMMISION));
         System.out.println("Additional " + quantity + " shares of " + super.getSymbol() +" @"+ price + "$ succesfully purchased!\n");
     }
