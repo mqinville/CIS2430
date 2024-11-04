@@ -3,6 +3,8 @@ package ePortfolio;
 import java.util.ArrayList; // Import arraylist functionality
 import java.util.HashMap; // Import hashmao functionality 
 import java.util.Scanner; // Import scanning functionality
+import java.util.HashSet; // Import HashSets to take intersection of array list in serach functinality
+import java.util.Set; // Import sets for array list intersections
 
 import java.util.InputMismatchException; // Input exception object to handle input mismatches
 
@@ -317,7 +319,7 @@ public class Portfolio {
 
     private void addKeywordIndex(Investment investment) {
             
-        String[] namePartition = investment.getName().trim().split(" ").;
+        String[] namePartition = investment.getName().trim().split(" ");
         int invesmentIndex = investmentPortfolio.indexOf(investment); // Integer variable that will hold the position of the invesment in the list
 
         for (String keyword : namePartition) {
@@ -326,6 +328,20 @@ public class Portfolio {
                 keywordSearchIndex.get(keyword).add(invesmentIndex);
             }
         }
+    }
+
+    private ArrayList<Integer> searchKeywordIndex(String keywords) {    
+
+        String[] keywordPartition = keywords.trim().split(" "); // Split the given keyword string at every space
+        Set<Integer> searchIndex = new HashSet<>(keywordSearchIndex.get(keywordPartition[0])); // Set the search index to the array list of the first keyword search, take the set of this for intersections
+        Set<Integer> intersection;// Denote set that will hold the arraylist we want to intersection with our serach index
+        
+        for (String curWord : keywordPartition) { // Loop through all given keywords    
+            intersection = new HashSet<>(keywordSearchIndex.get(curWord)); // get the array list of the current keywords index we want to intersect
+            searchIndex.retainAll(intersection); // Take the intersection of both sets -- make our serahc index keep the elements it only has in common with the intersection set
+        }
+
+        return new ArrayList<>(searchIndex); // Return the search index as an array
     }
 
     private void removeKeywordIndex(Investment investment) { // Used when we sell an investment
@@ -340,8 +356,6 @@ public class Portfolio {
             }
         }
     }   
-
-
 
     /**
      * Prints the information for a completed sale, when an investment (either stock or mutual fund)
