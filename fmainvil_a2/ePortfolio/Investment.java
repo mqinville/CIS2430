@@ -1,7 +1,5 @@
 package ePortfolio;
 
-import java.io.BufferedReader;
-
 /**
  * The abstracted Investment class represents the superclass for all investments.
  * It stores the symbol, name, quantity, price, and book value of the investment

@@ -111,6 +111,6 @@ public class Stock extends Investment {
              "\nStock name: " + super.getName() + 
              "\nQuantity: " + super.getQuantity() + 
              "\nPrice: " + String.format("%.2f", super.getPrice()) + "$" +
-             "\nbookValue: " + String.format("%.2f", super.getBookValue()) + "$"; 
+             "\nbookValue: " + String.format("%.2f", super.getBookValue()) + "$\n"; 
     }
 }

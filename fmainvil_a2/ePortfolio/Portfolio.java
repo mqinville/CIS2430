@@ -11,6 +11,7 @@ import java.util.Scanner; // Import scanning functionality
 import java.util.HashSet; // Import HashSets to take intersection of array list in serach functinality
 import java.util.Set; // Import sets for array list intersections
 import java.util.InputMismatchException; // Input exception object to handle input mismatches
+import java.util.Map;
 
 /**
 * The Portfolio class represents a user's investment portfolio.
@@ -62,14 +63,14 @@ public class Portfolio {
                 case "stock":
                     Stock newStock = new Stock(symbol, name, buyQuantity, buyPrice);
                     investmentPortfolio.add(newStock); // Add the new stock to the list
-                    addKeywordIndex(newStock);
+                    updateKeywordIndex();
                     System.out.println("New purchase! " + buyQuantity + " shares of " + symbol +" @"+ buyPrice + "$ successfully purchased!");                
                 break;
 
                 case "mutualfund":
                     MutualFund newMutFund = new MutualFund(symbol, name, buyQuantity, buyPrice); // Create new mutual fund object
                     investmentPortfolio.add(newMutFund); // Add the newly created mutfund to the list
-                    addKeywordIndex(newMutFund);
+                    updateKeywordIndex();
                     System.out.println("New purchase! " + buyQuantity + " units of " + symbol +" @"+ buyPrice + "$ successfully purchased!");
                 break;
 
@@ -119,8 +120,8 @@ public class Portfolio {
                 } else if (foundInvestment instanceof MutualFund) {
                     printCompleteSaleInfo(sellPrice, ((MutualFund)foundInvestment).getSalePayment(), ((MutualFund)foundInvestment).getGain(), symbol, "mutualfund"); // Print the sale info
                 }
-                removeKeywordIndex(foundInvestment); // Update the keyword search index after completely selling an investment
                 investmentPortfolio.remove(foundInvestment); // Remove the investment from the list if we sell it completely
+                updateKeywordIndex(); // Update the keyword search index after completely selling an investment
             } else if (sellQuantity < foundInvestment.getQuantity()) {
                 if (foundInvestment instanceof Stock) { 
                     ((Stock)foundInvestment).sellSomeStocks(sellPrice, sellQuantity);
@@ -192,6 +193,7 @@ public class Portfolio {
      * @param scanner the Scanner object used to read user input for the search criteria
      */
     public void searchInvestmentPortfolio(Scanner scanner) {
+        printKeywordSearchIndex();
         String symbol, priceRange, keyWordsString; // Strings that hold will hold info needed for invesment search
         boolean searchFound = false; // Boolean variable to see to denote if a search was found
         System.out.print("Enter a symbol for search: ");
@@ -330,21 +332,12 @@ public class Portfolio {
 
         return investmentPrice;
     }
-
-    private void addKeywordIndex(Investment investment) {
-            
-        String[] namePartition = investment.getName().trim().split(" ");
-        int invesmentIndex = investmentPortfolio.indexOf(investment); // Integer variable that will hold the position of the invesment in the list
-
-        for (String keyword : namePartition) {
-            keyword = keyword.toLowerCase();
-            keywordSearchIndex.putIfAbsent(keyword, new ArrayList<Integer>()); // Create a new entry in the keywordSearchIndex if there is no entry with this key yet
-            if (!keywordSearchIndex.get(keyword).contains(invesmentIndex)) {
-                keywordSearchIndex.get(keyword).add(invesmentIndex);
-            }
-        }
-    }
-
+    
+    /**
+     * Helper function that gets the search index of investments we must find access given a keyword string
+     * @param keywords string variable containing the keywords we will be searching for
+     * @return an arrayList containing the indices of investment we must print
+     */
     private ArrayList<Integer> getSearchIndex(String keywords) {    
 
         String[] keywordPartition = keywords.trim().split(" "); // Split the given keyword string at every space
@@ -364,19 +357,23 @@ public class Portfolio {
         return new ArrayList<Integer>(searchIndex); // Return the search index as an array
     }
 
-    private void removeKeywordIndex(Investment investment) { // Used when we sell an investment
+    private void updateKeywordIndex() {
+        keywordSearchIndex.clear(); // Clear the serach index
 
-        String[] namePartition = investment.getName().trim().split(" ");
-        int invesmentIndex = investmentPortfolio.indexOf(investment); // Integer variable that will hold the position of the invesment in the list
-        
-        for (String keyword : namePartition) {
-            keywordSearchIndex.get(keyword).remove(invesmentIndex); // Get the array list for the specific keyworf and remove said investment index from the list
-            if (keywordSearchIndex.get(keyword).isEmpty()) {
-                keywordSearchIndex.remove(keyword); // If the array list for a particular keyword is empty then remove it from the keywordSearchIndex
+        for (Investment curInvestment : investmentPortfolio) {
+            String[] keywordSplit = curInvestment.getName().toLowerCase().split(" "); 
+            for (String keyword : keywordSplit) {
+                keywordSearchIndex.putIfAbsent(keyword, new ArrayList<Integer>());
+                keywordSearchIndex.get(keyword).add(investmentPortfolio.indexOf(curInvestment));
             }
         }
     }
     
+    /**
+     * Save existing investment data to specified file declared in command line
+     * Saves investment data with specified format in document
+     * @param fileName string variable containing the filename we want to save our data too
+     */
     public void saveInvestmentsToFile(String fileName) {
         try (PrintWriter fileWriter = new PrintWriter(new FileWriter(fileName))) {
             for (Investment curInvestment : investmentPortfolio){
@@ -393,6 +390,10 @@ public class Portfolio {
         }
     }
 
+    /**
+     * Fetches and reads in data for investments written to a textfile, read ALL investments in a file
+     * @param fileName String variable containing the fileName of the file we must read from
+     */
     public void readInvestmentsFromFile(String fileName) {
         Investment curInvestment; // Investmebt variable that will hold the latest nvestment read from file
         
@@ -402,8 +403,10 @@ public class Portfolio {
 
             while (curInvestment != null) { // Keep reading while the investment is not null
                 investmentPortfolio.add(curInvestment); // Add the current investment to the list if it is valid
+                System.out.println(curInvestment);
                 curInvestment = readInvestmentFromFile(fileReader); // Proceed reading the next investment in the list
             }
+            updateKeywordIndex();
             return;
         } catch (IOException e) {
             System.out.println("Error loading from file.");
@@ -411,6 +414,12 @@ public class Portfolio {
         }
     }
 
+    /**
+     * Fetches information for data for a singular investment written to a textfile 
+     * @param fileReader a bufferedReader object to read investment data from a file
+     * @return an investment object with read investment data from the file
+     * @throws IOException
+     */
     public Investment readInvestmentFromFile(BufferedReader fileReader) throws IOException {
         String lineBeingRead;
         String[] lineReadSplit;
@@ -425,39 +434,38 @@ public class Portfolio {
             return null;
         }
 
-
         lineReadSplit = lineBeingRead.split(" = ");
-        System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
+        //System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
         type = lineReadSplit[1];
 
         // Read symbol
         lineBeingRead = fileReader.readLine(); // Read the line and split it at the equals symbol
         lineReadSplit = lineBeingRead.split(" = ");
-        System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
+        //System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
         symbol = lineReadSplit[1];
         
         // Read name
         lineBeingRead = fileReader.readLine(); // Read the line and split it at the equals symbol
         lineReadSplit = lineBeingRead.split(" = ");
-        System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
+        //System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
         name  = lineReadSplit[1];
 
         // Read quantity
         lineBeingRead = fileReader.readLine(); // Read the line and split it at the equals symbol
         lineReadSplit = lineBeingRead.split(" = ");
-        System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
+        //System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
         quantity = Integer.parseInt(lineReadSplit[1]);
 
         // Read price
         lineBeingRead = fileReader.readLine(); // Read the line and split it at the equals symbol
         lineReadSplit = lineBeingRead.split(" = ");
-        System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
+        //System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
         price = Double.parseDouble(lineReadSplit[1]);
 
         // Read bookValue
         lineBeingRead = fileReader.readLine(); // Read the line and split it at the equals symbol
         lineReadSplit = lineBeingRead.split(" = ");
-        System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
+        //System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
         bookeValue  = Double.parseDouble(lineReadSplit[1]);
         fileReader.readLine(); // Read the new line charcter
 
@@ -498,4 +506,22 @@ public class Portfolio {
             System.out.println("No more shares left, removing " + symbol +" from list"); // Print removal message
         }
     }
+
+    public void printKeywordSearchIndex() {
+    if (keywordSearchIndex == null || keywordSearchIndex.isEmpty()) {
+        System.out.println("The keyword search index is empty.");
+        return;
+    }
+
+    // Loop through each entry in the HashMap
+    for (Map.Entry<String, ArrayList<Integer>> entry : keywordSearchIndex.entrySet()) {
+        String keyword = entry.getKey();
+        ArrayList<Integer> indices = entry.getValue();
+        
+        System.out.print(keyword + ": ");
+        
+        // Print the list of indices for this keyword
+        System.out.println(indices);
+    }
+}
 }
