@@ -20,7 +20,6 @@ public abstract class Investment {
     /**
      * Investment class constructor - Constructs a new Investment object with the specified symbol, name, quantity, and price.
      * The book value is calculated by multiplying the quantity by the price, NOTE: commision taxes are not added in the general Investment class 
-     *
      * @param symbol the investment symbol, e.g., APPL for Apple
      * @param name the company name or investment name, e.g., Apple Inc.
      * @param quantity the number of shares purchased
@@ -32,6 +31,23 @@ public abstract class Investment {
         this.quantity = quantity;
         this.price = price;
         this.bookValue = (quantity * price);  // calculate and assign bookvalue DOES NOT APPLY INDIVIDUAL COMMISION TAXES
+    }
+
+    /**
+     * Investment class constructor - Constructs a new Investment object with the specified symbol, name, quantity, price and bookvalue.
+     * The book value is set to the argument passed 
+     * @param symbol the investment symbol, e.g., APPL for Apple
+     * @param name the company name or investment name, e.g., Apple Inc.
+     * @param quantity the number of shares purchased
+     * @param price the price per share
+     * @param bookValue the book value of the investment being read
+     */
+    public Investment (String symbol, String name, int quantity, double price, double bookValue) {
+        this.symbol = symbol;
+        this.name = name;
+        this.quantity = quantity;
+        this.price = price;
+        this.bookValue = bookValue;  // calculate and assign bookvalue DOES NOT APPLY INDIVIDUAL COMMISION TAXES
     }
 
     /**

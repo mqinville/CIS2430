@@ -24,6 +24,20 @@ public class Stock extends Investment {
     }   
 
     /**
+     * Stock class constructor - Constructs a new Stock object with the specified symbol, name, quantity, price and bookValue.
+     * The book value is set to the bookValue passed
+     *
+     * @param symbol the stock symbol, e.g., APPL for Apple
+     * @param name the company name or stock name, e.g., Apple Inc.
+     * @param quantity the number of shares purchased
+     * @param price the price per share
+     * @param bookValue the stocks new bookValue
+     */
+    public Stock(String symbol, String name, int quantity, double price, double bookvalue) {
+        super(symbol, name, quantity, price, bookvalue); // Call to super class constructor
+    }  
+
+    /**
      * No argumentStock class constructor - Constructs a new Stock object
      */
     public Stock() {
@@ -96,7 +110,7 @@ public class Stock extends Investment {
         // Update the values of investment
         super.setPrice(price);
         super.setQuantity(remainingQuantity);
-        super.setBookValue(bookValueSold);
+        super.setBookValue(bookValueRemaining);
     }
 
     @Override

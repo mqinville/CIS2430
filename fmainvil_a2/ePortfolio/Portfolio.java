@@ -1,6 +1,7 @@
 package ePortfolio;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -79,14 +80,15 @@ public class Portfolio {
                 break;
             }
         } else {
-            if (foundInvestment instanceof Stock) { // If found investment is a stock update it variables
+            if (foundInvestment instanceof Stock && buyOption.equalsIgnoreCase("stock")) { // If found investment is a stock update it variables
                 ((Stock)foundInvestment).buyMoreStocks(buyPrice, buyQuantity); 
-            } else if (foundInvestment instanceof MutualFund) { // else updatevthe mututal fund variables
+            } else if (foundInvestment instanceof MutualFund && buyOption.equalsIgnoreCase("mutualfund")) { // else updatevthe mututal fund variables
                 ((MutualFund)foundInvestment).buyMoreFunds(buyPrice, buyQuantity);
+            } else {
+                System.out.println(symbol + " is already a symbol for other investment type.");
             }
         }
     }    
-
     /**
      * Prompts the user to sell an investment given an investment symbol.
      * It checks if the investment already exists in the portfolio. If it does,
@@ -400,7 +402,6 @@ public class Portfolio {
         try (BufferedReader fileReader = new BufferedReader(new FileReader(fileName))){
 
             curInvestment = readInvestmentFromFile(fileReader); // Read the first investment from the file
-
             while (curInvestment != null) { // Keep reading while the investment is not null
                 investmentPortfolio.add(curInvestment); // Add the current investment to the list if it is valid
                 System.out.println(curInvestment);
@@ -408,10 +409,12 @@ public class Portfolio {
             }
             updateKeywordIndex();
             return;
+        } catch (FileNotFoundException e) {    
+            System.out.println("File does not exist, will save on exit to new file name: " + fileName);
         } catch (IOException e) {
-            System.out.println("Error loading from file.");
-            return;
-        }
+            System.out.println("Error reading data from file.");
+        } 
+        return;
     }
 
     /**
@@ -425,7 +428,7 @@ public class Portfolio {
         String[] lineReadSplit;
         String type, symbol, name;
         int quantity;
-        double price, bookeValue;  
+        double price, bookValue;  
 
         // Read the type of investment written to the file
         lineBeingRead = fileReader.readLine(); // Read the line and split it at the equals symbol
@@ -466,19 +469,17 @@ public class Portfolio {
         lineBeingRead = fileReader.readLine(); // Read the line and split it at the equals symbol
         lineReadSplit = lineBeingRead.split(" = ");
         //System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
-        bookeValue  = Double.parseDouble(lineReadSplit[1]);
+        bookValue  = Double.parseDouble(lineReadSplit[1]);
         fileReader.readLine(); // Read the new line charcter
 
+        // Return an instance of the investment
         if (type.equalsIgnoreCase("stock")) {
-            return new Stock(symbol, name, quantity, price);
+            return new Stock(symbol, name, quantity, price, bookValue);
         } else if (type.equalsIgnoreCase("mutualfund")) {
-            return new MutualFund(symbol, name, quantity, price);
+            return new MutualFund(symbol, name, quantity, price,bookValue);
         }
-
         return null;
-
     }
-
 
     /**
      * Prints the information for a completed sale, when an investment (either stock or mutual fund)

@@ -24,6 +24,20 @@ public class MutualFund extends Investment {
     }
 
     /**
+     * MutualFund class constructor - Constructs a new mutualfund object with the specified symbol, name, quantity, price and bookValue.
+     * The book value is set to the bookvalue argument passed
+     *
+     * @param symbol the stock symbol, e.g., APPL for Apple
+     * @param name the company name or stock name, e.g., Apple Inc.
+     * @param quantity the number of shares purchased
+     * @param price the price per share
+     * @param bookValue
+     */
+    public MutualFund(String symbol, String name, int quantity, double price, double bookValue) {
+        super(symbol, name, quantity, price, bookValue);
+    }
+
+    /**
      * No argumentStock class constructor - Constructs a new Stock object
      */
     public MutualFund() {
@@ -96,7 +110,7 @@ public class MutualFund extends Investment {
         // Update values of the investment
         super.setPrice(price);
         super.setQuantity(remainingQuantity);
-        super.setBookValue(bookValueSold);
+        super.setBookValue(bookValueRemaining);
     }
 
     /**
@@ -106,7 +120,7 @@ public class MutualFund extends Investment {
      * @return a string representing the mutualfund's details
      */
     public String toString() {
-        return "\nMutualfund symbol: " + super.getSymbol() +
+        return "Mutualfund symbol: " + super.getSymbol() +
                "\nMutual fund name: " + super.getName() + 
                "\nQuantity: " + super.getQuantity() + 
                "\nPrice: " + String.format("%.2f", super.getPrice()) + "$" +
