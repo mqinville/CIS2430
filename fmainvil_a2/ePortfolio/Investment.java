@@ -79,11 +79,11 @@ public abstract class Investment {
      * @return a string representing the investment's details to be written to a file
      */
     public String fileToString() {
-        return "symbol = " + this.symbol +
-             "\nname = " + this.name + 
-             "\nquantity = " + this.quantity + 
-             "\nprice = " + String.format("%.2f", this.price) +
-             "\nbookValue = " + String.format("%.2f", this.bookValue) + "\n";
+        return "symbol = \"" + this.symbol + "\"" +
+             "\nname = \"" + this.name + "\"" +
+             "\nquantity = \"" + this.quantity + "\"" +
+             "\nprice = \"" + String.format("%.2f", this.price) + "\"" +
+             "\nbookValue = \"" + String.format("%.2f", this.bookValue) + "\"\n";
     }
     
     /**

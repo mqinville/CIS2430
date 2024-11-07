@@ -10,7 +10,7 @@ import java.util.ArrayList; // Import arraylist functionality
 import java.util.HashMap; // Import hashmao functionality 
 import java.util.Scanner; // Import scanning functionality
 import java.util.HashSet; // Import HashSets to take intersection of array list in serach functinality
-import java.util.Set; // Import sets for array list intersections
+//import java.util.Set; // Import sets for array list intersections
 import java.util.InputMismatchException; // Input exception object to handle input mismatches
 import java.util.Map;
 
@@ -113,7 +113,7 @@ public class Portfolio {
 
             // If an invalid sell quantity is given return from the function
             if (sellQuantity > foundInvestment.getQuantity()) {
-                System.out.println("Error selling investment. Only " + foundInvestment.getQuantity() + "shares, cannot sell" + sellQuantity + "\n"); // Print error message 
+                System.out.println("Error selling investment. Only " + foundInvestment.getQuantity() + " shares, cannot sell " + sellQuantity + "\n"); // Print error message 
                 return; // return if sell quantity is greater than currently owned quantity
 
             } else if (sellQuantity == foundInvestment.getQuantity()) {
@@ -195,7 +195,7 @@ public class Portfolio {
      * @param scanner the Scanner object used to read user input for the search criteria
      */
     public void searchInvestmentPortfolio(Scanner scanner) {
-        printKeywordSearchIndex();
+        //printKeywordSearchIndex();
         String symbol, priceRange, keyWordsString; // Strings that hold will hold info needed for invesment search
         boolean searchFound = false; // Boolean variable to see to denote if a search was found
         System.out.print("Enter a symbol for search: ");
@@ -343,7 +343,7 @@ public class Portfolio {
     private ArrayList<Integer> getSearchIndex(String keywords) {    
 
         String[] keywordPartition = keywords.trim().split(" "); // Split the given keyword string at every space
-        Set<Integer> searchIndex, intersection;// Sets that will hold arrayList indices for intersection
+        HashSet<Integer> searchIndex, intersection;// Sets that will hold arrayList indices for intersection
 
         if (keywordSearchIndex.get(keywordPartition[0]) == null) {
             return null; // Return null indicting no investment with keyword
@@ -381,9 +381,9 @@ public class Portfolio {
             for (Investment curInvestment : investmentPortfolio){
                 // Write the type of investment before info
                 if (curInvestment instanceof Stock) {
-                    fileWriter.println("type = stock");
+                    fileWriter.println("type = \"stock\"");
                 } else if (curInvestment instanceof MutualFund) {
-                    fileWriter.println("type = mutualfund");
+                    fileWriter.println("type = \"mutualfund\"");
                 }
                 fileWriter.println(curInvestment.fileToString()); // Print the investment info to the file
             }
@@ -400,7 +400,6 @@ public class Portfolio {
         Investment curInvestment; // Investmebt variable that will hold the latest nvestment read from file
         
         try (BufferedReader fileReader = new BufferedReader(new FileReader(fileName))){
-
             curInvestment = readInvestmentFromFile(fileReader); // Read the first investment from the file
             while (curInvestment != null) { // Keep reading while the investment is not null
                 investmentPortfolio.add(curInvestment); // Add the current investment to the list if it is valid
@@ -408,6 +407,7 @@ public class Portfolio {
                 curInvestment = readInvestmentFromFile(fileReader); // Proceed reading the next investment in the list
             }
             updateKeywordIndex();
+            fileReader.close();
             return;
         } catch (FileNotFoundException e) {    
             System.out.println("File does not exist, will save on exit to new file name: " + fileName);
@@ -421,7 +421,7 @@ public class Portfolio {
      * Fetches information for data for a singular investment written to a textfile 
      * @param fileReader a bufferedReader object to read investment data from a file
      * @return an investment object with read investment data from the file
-     * @throws IOException
+     * @throws IOException 
      */
     public Investment readInvestmentFromFile(BufferedReader fileReader) throws IOException {
         String lineBeingRead;
@@ -437,39 +437,42 @@ public class Portfolio {
             return null;
         }
 
+        // The following regex pattern was found on stack overflow :("^\"+|\"+$", ""); -> It removes leading and trailing quotation marks from a string
+        // https://stackoverflow.com/questions/2088037/trim-characters-in-java
+
         lineReadSplit = lineBeingRead.split(" = ");
         //System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
-        type = lineReadSplit[1];
+        type = lineReadSplit[1].replaceAll("^\"+|\"+$", ""); // Make the type equal to the string without trailing/leadingquotes
 
         // Read symbol
         lineBeingRead = fileReader.readLine(); // Read the line and split it at the equals symbol
         lineReadSplit = lineBeingRead.split(" = ");
         //System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
-        symbol = lineReadSplit[1];
+        symbol = lineReadSplit[1].replaceAll("^\"+|\"+$", "");;
         
         // Read name
         lineBeingRead = fileReader.readLine(); // Read the line and split it at the equals symbol
         lineReadSplit = lineBeingRead.split(" = ");
         //System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
-        name  = lineReadSplit[1];
+        name  = lineReadSplit[1].replaceAll("^\"+|\"+$", "");;
 
         // Read quantity
         lineBeingRead = fileReader.readLine(); // Read the line and split it at the equals symbol
         lineReadSplit = lineBeingRead.split(" = ");
         //System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
-        quantity = Integer.parseInt(lineReadSplit[1]);
+        quantity = Integer.parseInt(lineReadSplit[1].replaceAll("^\"+|\"+$", ""));
 
         // Read price
         lineBeingRead = fileReader.readLine(); // Read the line and split it at the equals symbol
         lineReadSplit = lineBeingRead.split(" = ");
         //System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
-        price = Double.parseDouble(lineReadSplit[1]);
+        price = Double.parseDouble(lineReadSplit[1].replaceAll("^\"+|\"+$", ""));
 
         // Read bookValue
         lineBeingRead = fileReader.readLine(); // Read the line and split it at the equals symbol
         lineReadSplit = lineBeingRead.split(" = ");
         //System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
-        bookValue  = Double.parseDouble(lineReadSplit[1]);
+        bookValue  = Double.parseDouble(lineReadSplit[1].replaceAll("^\"+|\"+$", ""));
         fileReader.readLine(); // Read the new line charcter
 
         // Return an instance of the investment
@@ -509,20 +512,20 @@ public class Portfolio {
     }
 
     public void printKeywordSearchIndex() {
-    if (keywordSearchIndex == null || keywordSearchIndex.isEmpty()) {
-        System.out.println("The keyword search index is empty.");
-        return;
-    }
+        if (keywordSearchIndex == null || keywordSearchIndex.isEmpty()) {
+            System.out.println("The keyword search index is empty.");
+            return;
+        }
 
     // Loop through each entry in the HashMap
-    for (Map.Entry<String, ArrayList<Integer>> entry : keywordSearchIndex.entrySet()) {
-        String keyword = entry.getKey();
-        ArrayList<Integer> indices = entry.getValue();
-        
-        System.out.print(keyword + ": ");
-        
-        // Print the list of indices for this keyword
-        System.out.println(indices);
+        for (Map.Entry<String, ArrayList<Integer>> entry : keywordSearchIndex.entrySet()) {
+            String keyword = entry.getKey();
+            ArrayList<Integer> indices = entry.getValue();
+            
+            System.out.print(keyword + ": ");
+            
+            // Print the list of indices for this keyword
+            System.out.println(indices);
+        }
     }
-}
 }
