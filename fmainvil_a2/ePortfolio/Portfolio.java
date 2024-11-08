@@ -10,9 +10,7 @@ import java.util.ArrayList; // Import arraylist functionality
 import java.util.HashMap; // Import hashmao functionality 
 import java.util.Scanner; // Import scanning functionality
 import java.util.HashSet; // Import HashSets to take intersection of array list in serach functinality
-//import java.util.Set; // Import sets for array list intersections
 import java.util.InputMismatchException; // Input exception object to handle input mismatches
-import java.util.Map;
 
 /**
 * The Portfolio class represents a user's investment portfolio.
@@ -163,7 +161,7 @@ public class Portfolio {
      * as well as the combined total gain for the entire investment portfolio.
      */
     public void getGainPortfolio() {
-        double[] gains = {0.00,0.00}; // Create integer array, index one holds sum of gains for stocks, index 2 for mutualfunds
+        double[] gains = {0.00, 0.00}; // Create integer array, index one holds sum of gains for stocks, index 2 for mutualfunds
 
         System.out.println("\n");
 
@@ -195,7 +193,6 @@ public class Portfolio {
      * @param scanner the Scanner object used to read user input for the search criteria
      */
     public void searchInvestmentPortfolio(Scanner scanner) {
-        //printKeywordSearchIndex();
         String symbol, priceRange, keyWordsString; // Strings that hold will hold info needed for invesment search
         boolean searchFound = false; // Boolean variable to see to denote if a search was found
         System.out.print("Enter a symbol for search: ");
@@ -207,7 +204,6 @@ public class Portfolio {
         System.out.print("Enter a set of keywords for search: ");
         keyWordsString = scanner.nextLine().toLowerCase();
         System.out.println("\n");
-
         
         if (keyWordsString == null || keyWordsString.isBlank()) { // If the keywordString is null then search list sequantially
             // Loop through investments and print
@@ -219,6 +215,7 @@ public class Portfolio {
             }
         } else {
             ArrayList<Integer> searchIndex = getSearchIndex(keyWordsString); // Else if keywords string given get the improved serach index
+            System.out.println("Working!!!");
 
             if (searchIndex != null) { // If the fetched serach index is not null proceed with search
                 for (int i : searchIndex) {
@@ -398,7 +395,6 @@ public class Portfolio {
      */
     public void readInvestmentsFromFile(String fileName) {
         Investment curInvestment; // Investmebt variable that will hold the latest nvestment read from file
-        
         try (BufferedReader fileReader = new BufferedReader(new FileReader(fileName))){
             curInvestment = readInvestmentFromFile(fileReader); // Read the first investment from the file
             while (curInvestment != null) { // Keep reading while the investment is not null
@@ -441,37 +437,31 @@ public class Portfolio {
         // https://stackoverflow.com/questions/2088037/trim-characters-in-java
 
         lineReadSplit = lineBeingRead.split(" = ");
-        //System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
         type = lineReadSplit[1].replaceAll("^\"+|\"+$", ""); // Make the type equal to the string without trailing/leadingquotes
 
         // Read symbol
         lineBeingRead = fileReader.readLine(); // Read the line and split it at the equals symbol
         lineReadSplit = lineBeingRead.split(" = ");
-        //System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
         symbol = lineReadSplit[1].replaceAll("^\"+|\"+$", "");;
         
         // Read name
         lineBeingRead = fileReader.readLine(); // Read the line and split it at the equals symbol
         lineReadSplit = lineBeingRead.split(" = ");
-        //System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
         name  = lineReadSplit[1].replaceAll("^\"+|\"+$", "");;
 
         // Read quantity
         lineBeingRead = fileReader.readLine(); // Read the line and split it at the equals symbol
         lineReadSplit = lineBeingRead.split(" = ");
-        //System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
         quantity = Integer.parseInt(lineReadSplit[1].replaceAll("^\"+|\"+$", ""));
 
         // Read price
         lineBeingRead = fileReader.readLine(); // Read the line and split it at the equals symbol
         lineReadSplit = lineBeingRead.split(" = ");
-        //System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
         price = Double.parseDouble(lineReadSplit[1].replaceAll("^\"+|\"+$", ""));
 
         // Read bookValue
         lineBeingRead = fileReader.readLine(); // Read the line and split it at the equals symbol
         lineReadSplit = lineBeingRead.split(" = ");
-        //System.out.println(lineReadSplit[0]+ lineReadSplit[1]);
         bookValue  = Double.parseDouble(lineReadSplit[1].replaceAll("^\"+|\"+$", ""));
         fileReader.readLine(); // Read the new line charcter
 
@@ -508,24 +498,6 @@ public class Portfolio {
             System.out.println("Payment from sale: " + String.format("%.2f",payment) + "$."); // Print payment from sale
             System.out.println("Total gain from sale: " + String.format("%.2f",gain) + "$."); // Print total gain after sale
             System.out.println("No more shares left, removing " + symbol +" from list"); // Print removal message
-        }
-    }
-
-    public void printKeywordSearchIndex() {
-        if (keywordSearchIndex == null || keywordSearchIndex.isEmpty()) {
-            System.out.println("The keyword search index is empty.");
-            return;
-        }
-
-    // Loop through each entry in the HashMap
-        for (Map.Entry<String, ArrayList<Integer>> entry : keywordSearchIndex.entrySet()) {
-            String keyword = entry.getKey();
-            ArrayList<Integer> indices = entry.getValue();
-            
-            System.out.print(keyword + ": ");
-            
-            // Print the list of indices for this keyword
-            System.out.println(indices);
         }
     }
 }

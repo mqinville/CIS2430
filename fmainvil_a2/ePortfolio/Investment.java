@@ -7,9 +7,12 @@ package ePortfolio;
  * mutual funds based on search criteria. NOTE: For the investment superclass, commision 
  * taxes are not applied to buy or sell operations. The class also includes getters and 
  * setters for its attributes.
+ * 
+ * NOTE: We define instance variables as private as we do not want investment data to be accessible directly from our main or portfolio class.
+ *       We keep the instance data private and access them with the corresponding mutator/accessor methods with the super constructor when they need to be referenced.
+ *       While protected encapsulation would suffice, referencing them with the 'this.<variable>' method would hinder the transparency of which objects are being referenced and where.
  */
 public abstract class Investment {
-
     // Declare common investment attributes - Make them private as we want to hide our investment data
     private String symbol; // This will hold the investment tag Eg. APPL for appke
     private String name; // This will hold the company/innvestment name Eg. Apple Inc.
@@ -352,7 +355,4 @@ public abstract class Investment {
         }
         return true; // return true indicating valid set
     }
-
-    
-    
 }

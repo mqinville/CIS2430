@@ -6,8 +6,17 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in); // Declare new scanner
         Portfolio investmentPortoflio = new Portfolio(); // Create a portfolio object 
+        String fileName;
 
-        investmentPortoflio.readInvestmentsFromFile(args[0]); // Read existing investments from the file
+        
+        try {
+            fileName = args[0];
+            investmentPortoflio.readInvestmentsFromFile(fileName); // Read existing investments from the file
+        } catch (ArrayIndexOutOfBoundsException e) {
+            fileName = "portfolio.txt";
+            System.out.println("No file name was given creating general \'portfolio.txt\' file");
+            investmentPortoflio.readInvestmentsFromFile(fileName); // Read existing investments from the file
+        }
 
         do {
             printMenu(); //  Print the menu
@@ -55,7 +64,7 @@ public class Main {
                 case "qu":
                 case "qui":
                 case "quit":
-                    investmentPortoflio.saveInvestmentsToFile(args[0]); // Save current investment information to a file
+                    investmentPortoflio.saveInvestmentsToFile(fileName); // Save current investment information to a file
                     scanner.close();
                     System.exit(0);
                 break;
